@@ -484,6 +484,9 @@ static void process_footnotes(cmark_parser *parser) {
         if (!footnote->ix)
           footnote->ix = ++ix;
 
+        cur->user_data = parser->mem->calloc(1, (sizeof(char) * cur->as.literal.len) + 1);
+        memmove(cur->user_data, cur->as.literal.data, cur->as.literal.len);
+
         char n[32];
         snprintf(n, sizeof(n), "%d", footnote->ix);
         cmark_chunk_free(parser->mem, &cur->as.literal);
