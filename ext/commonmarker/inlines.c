@@ -1142,7 +1142,7 @@ noMatch:
     cmark_chunk *literal = &opener->inl_text->next->as.literal;
     // look back to the opening '[', and skip ahead to the next character
     // if we're looking at a '[^' sequence, let's call it a footnote reference.
-    if (literal->len > 1 && literal->data[0] == '^') {
+    if (literal->data[0] == '^' && (literal->len > 1 || opener->inl_text->next->next)) {
       cmark_node *fnref = make_simple(subj->mem, CMARK_NODE_FOOTNOTE_REFERENCE);
 
       // the start and end of the footnote ref is the opening and closing brace
@@ -1160,6 +1160,7 @@ noMatch:
       // this copies the footnote reference string, even if between the
       // `opener` and the subject's current position there are other nodes
       fnref->as.literal = cmark_chunk_dup(literal, 1, (fnref_end_column - fnref_start_column) - 2);
+
       fnref->start_line = fnref->end_line = subj->line;
       fnref->start_column = fnref_start_column;
       fnref->end_column = fnref_end_column;
