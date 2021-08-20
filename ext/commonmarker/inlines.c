@@ -1140,9 +1140,18 @@ noMatch:
       opener->inl_text->next->type == CMARK_NODE_TEXT) {
 
     cmark_chunk *literal = &opener->inl_text->next->as.literal;
+
     // look back to the opening '[', and skip ahead to the next character
-    // if we're looking at a '[^' sequence, let's call it a footnote reference.
+    // if we're looking at a '[^' sequence, and there is other text or nodes
+    // after the ^, let's call it a footnote reference.
     if (literal->data[0] == '^' && (literal->len > 1 || opener->inl_text->next->next)) {
+
+      // Before we got this far, the `handle_close_bracket` function may have
+      // advanced the current state beyond our footnote's actual closing
+      // bracket, ie if it went looking for a `link_label`.
+      // Let's just rewind the subject's position:
+      subj->pos = initial_pos;
+
       cmark_node *fnref = make_simple(subj->mem, CMARK_NODE_FOOTNOTE_REFERENCE);
 
       // the start and end of the footnote ref is the opening and closing brace
